@@ -3,7 +3,7 @@ var animate = window.requestAnimationFrame ||
     window.mozRequestAnimationFrame ||
     function(callBack) { window.setTimeout(callBack, 1000/60)};
 
-var canvas = document.createElement('canvas');
+var canvas = document.getElementById('canvas');
 var width = 480;
 var height = 480;
 canvas.width = width;
