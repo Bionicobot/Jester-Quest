@@ -32,25 +32,38 @@ var KVAL = {
     C       : 0b1000000,
     ESC     : 0b10000000,
     SHIFT   : 0b100000000,
+    
+    key     : {
+        38  :   0b1,
+        40  :   0b10,
+        37  :   0b100,
+        39  :   0b1000,
+        90  :   0b10000,
+        88  :   0b100000,
+        67  :   0b1000000,
+        27  :   0b10000000,
+        16  :   0b100000000
+    }
 };
 
 var keysDown = 0;
 
 window.addEventListener("keydown", function(event) {
-  keysDown[event.keyCode] = true;
+    if(!keysDown & KVAL.key[event.keyCode] == KVAL.key[event.keyCode]){
+       keysDown |= KVAL.key[event.keyCode];
+       }
+  //keysDown[event.keyCode] = true;
 });
 
 window.addEventListener("keyup", function(event) {
-  delete keysDown[event.keyCode];
+    if(keysDown & KVAL.key[event.keyCode] == KVAL.key[event.keyCode]){
+       keysDown &= ~KVAL.key[event.keyCode];
+       }
 });
 
 
 var runTitle = function(){
-    var string = "Keys Down:";
-    for(var key in keysDown) {
-        var value = Number(key);
-        //string += " " + String.fromCharCode(key);
-    }
+    var string = "Keys Down: " + keysDown;
     context.fillStyle = "#ffffff";
     context.fillText(string, 0, 10, 10000);
 };
