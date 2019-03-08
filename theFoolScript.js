@@ -13,6 +13,11 @@ var frameCount = 0;
 var frame = 0;
 var dir = 0;
 var gameState = 0;
+var myX = 0;
+var myY = 0;
+var myXm = 0;
+var myYm = 0;
+const walkSpeed = 512;
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -23,49 +28,55 @@ window.onload = function() {
 };
 
 var KVAL = {
-    UP      : 0b1,
-    DOWN    : 0b10,
-    LEFT    : 0b100,
-    RIGHT   : 0b1000,
-    Z       : 0b10000,
-    X       : 0b100000,
-    C       : 0b1000000,
-    ESC     : 0b10000000,
-    SHIFT   : 0b100000000,
+    
+    UP      : 1,
+    DOWN    : 2,
+    LEFT    : 3,
+    RIGHT   : 4,
+    Z       : 5,
+    X       : 6,
+    C       : 7,
+    ESC     : 8,
+    SHIFT   : 9,
     
     key     : {
-        38  :   0b1,
-        40  :   0b10,
-        37  :   0b100,
-        39  :   0b1000,
-        90  :   0b10000,
-        88  :   0b100000,
-        67  :   0b1000000,
-        27  :   0b10000000,
-        16  :   0b100000000
+        38  :   0b10,
+        40  :   0b100,
+        37  :   0b1000,
+        39  :   0b10000,
+        90  :   0b100000,
+        88  :   0b1000000,
+        67  :   0b10000000,
+        27  :   0b100000000,
+        16  :   0b1000000000
     }
 };
 
-var keysDown = 0;
+var keys = 0;
 
-window.addEventListener("keydown", function(event) {
-    if(!keysDown & KVAL.key[event.keyCode] == KVAL.key[event.keyCode]){
-       keysDown |= KVAL.key[event.keyCode];
-       }
-  //keysDown[event.keyCode] = true;
-});
+var kDown = function(event){
+    keys |= KVAL.key[event.keyCode];
+};
 
-window.addEventListener("keyup", function(event) {
-    if(keysDown & KVAL.key[event.keyCode] == KVAL.key[event.keyCode]){
-       keysDown &= ~KVAL.key[event.keyCode];
-       }
-});
+var kUp = function(event){
+    keys &= ~KVAL.key[event.keyCode];
+};
 
+window.addEventListener("keydown", kDown);
+
+window.addEventListener("keyup", kUp);
+
+var isPress = function(bit){
+    return ((keys>>bit) % 2 != 0);
+};
 
 var runTitle = function(){
-    var string = "Keys Down: " + keysDown;
+    var string = "Keys Down: " + keys;
     context.fillStyle = "#ffffff";
     context.fillText(string, 0, 10, 10000);
+    if(isPress(KVAL.Z)){
+       gameState = 1;
+       }
 };
 
 var step = function(){
@@ -94,10 +105,30 @@ var update = function() {
           }
        }
     }
+    if(isPress(KVAL.UP)){
+       myYm = 0 - walkSpeed;
+       }
+    else if(isPress(KVAL.DOWN)){
+       myYm = walkSpeed;
+       }
+    else{
+        myYm = 0;
+    }
+    if(isPress(KVAL.LEFT)){
+       myXm = 0 - walkSpeed;
+       }
+    else if(isPress(KVAL.RIGHT)){
+       myXm = walkSpeed;
+       }
+    else{
+        myXm = 0;
+    }
+    myX += myXm;
+    myY += myYm;
 };
 
 var render = function(){
-    context.drawImage(MyIm, 0 + (16 * frame), 0 + (16 * dir), 16, 16, 0, 0, 16, 16);
+    context.drawImage(MyIm, 0 + (16 * frame), 0 + (16 * dir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
     
 };
 var npcAct = [ npc000 ];
