@@ -9,9 +9,9 @@ var height = 240;
 canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
-var frameCount = 0;
-var frame = 0;
-var dir = 0;
+var pframeCount = 0;
+var pframe = 0;
+var pdir = 0;
 var gameState = 0;
 var myX = 0;
 var myY = 0;
@@ -21,6 +21,9 @@ const walkSpeed = 512;
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
+
+var TitIm = new Image();
+TitIm.src = "title.png";
 
 window.onload = function() {
   document.body.appendChild(canvas);
@@ -74,6 +77,7 @@ var runTitle = function(){
     var string = "Keys Down: " + keys;
     context.fillStyle = "#ffffff";
     context.fillText(string, 0, 10, 10000);
+    context.drawImage(TitIm, 120 - 32, 60 - 24);
     if(isPress(KVAL.Z)){
        gameState = 1;
        }
@@ -96,39 +100,49 @@ var step = function(){
 };
 
 var update = function() {
-    if(++frameCount >= 10){
-        frameCount = 0;
-    if(++frame >= 4){
-        frame = 0;
-       if(++dir >= 4){
-          dir = 0;
-          }
-       }
-    }
-    if(isPress(KVAL.UP)){
-       myYm = 0 - walkSpeed;
-       }
-    else if(isPress(KVAL.DOWN)){
-       myYm = walkSpeed;
-       }
-    else{
-        myYm = 0;
-    }
+    
     if(isPress(KVAL.LEFT)){
        myXm = 0 - walkSpeed;
+        pdir = 1;
        }
     else if(isPress(KVAL.RIGHT)){
        myXm = walkSpeed;
+        pdir = 3
        }
     else{
         myXm = 0;
     }
+    
+    if(isPress(KVAL.UP)){
+       myYm = 0 - walkSpeed;
+        pdir = 2
+       }
+    else if(isPress(KVAL.DOWN)){
+       myYm = walkSpeed;
+        pdir = 0;
+       }
+    else{
+        myYm = 0;
+    }
+    
+    if(isPress(KVAL.UP) || isPress(KVAL.DOWN) || isPress(KVAL.LEFT) || isPress(KVAL.RIGHT)){
+        if(++pframeCount >= 10){
+            pframeCount = 0;
+            if(++pframe >= 4){
+                pframe = 0;
+            }
+        }
+    }
+    else{
+        pframe = 0;
+    }
+    
     myX += myXm;
     myY += myYm;
 };
 
 var render = function(){
-    context.drawImage(MyIm, 0 + (16 * frame), 0 + (16 * dir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
+    context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
     
 };
 var npcAct = [ npc000 ];
