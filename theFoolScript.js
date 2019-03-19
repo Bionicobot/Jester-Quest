@@ -4,6 +4,7 @@ var animate = window.requestAnimationFrame ||
     function(callBack) { window.setTimeout(callBack, 1000/60)};
 
 var canvas = document.getElementById('canvas');
+canvas.style.border = '1px solid white';
 var width = 240;
 var height = 240;
 canvas.width = width;
@@ -142,10 +143,13 @@ var update = function() {
 };
 
 var render = function(){
+
+    context.fillStyle = '#17111A';
+    context.fillRect(0,0,width,height);
+
     context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
-    
 };
-var npcAct = [ npc000 ];
+
 
 function NPC( npcType, x,  y,  xm,  ym,  dir,  state,  parent){
     this.type = npcType;

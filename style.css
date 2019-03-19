@@ -6,6 +6,9 @@
     left: 0;
     right: 0;
     margin:auto;
+}
+body{
+    background-color: #17111A;
   width: 480px;
   height: 480px;
   image-rendering: -moz-crisp-edges;
