@@ -1,7 +1,4 @@
-var animate = window.requestAnimationFrame || 
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    function(callBack) { window.setTimeout(callBack, 1000/60)};
+var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callBack) { window.setTimeout(callBack, 1000 / 60); };
 
 var canvas = document.getElementById('canvas');
 var width = 240;
@@ -17,7 +14,9 @@ var myX = 0;
 var myY = 0;
 var myXm = 0;
 var myYm = 0;
-const walkSpeed = 512;
+var walkSpeed = 512;
+
+
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -25,9 +24,26 @@ MyIm.src = "fool.png";
 var TitIm = new Image();
 TitIm.src = "title.png";
 
-window.onload = function() {
-  document.body.appendChild(canvas);
-  animate(step);
+var step = function () {
+    context.fillStyle = '#17111A';
+    context.fillRect(0, 0, width, height);
+    
+    switch (gameState) {
+    case 0:
+        runTitle();
+        break;
+    case 1:
+        update();
+        render();
+        break;
+    }
+    animate(step);
+};
+
+
+window.onload = function () {
+    document.body.appendChild(canvas);
+    animate(step);
 };
 
 var KVAL = {
@@ -83,22 +99,6 @@ var runTitle = function(){
        }
 };
 
-var step = function(){
-    context.fillStyle = '#17111A';
-    context.fillRect(0,0,width,height);
-    
-    switch(gameState){
-        case 0:
-            runTitle();
-            break;
-        case 1:
-            update();
-            render();
-            break;
-    }
-    animate(step);
-};
-
 var update = function() {
     
     if(isPress(KVAL.LEFT)){
@@ -145,6 +145,7 @@ var render = function(){
     context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
     
 };
+
 var npcAct = [ npc000 ];
 
 function NPC( npcType, x,  y,  xm,  ym,  dir,  state,  parent){
