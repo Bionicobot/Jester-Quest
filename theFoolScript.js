@@ -1,5 +1,48 @@
 var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callBack) { window.setTimeout(callBack, 1000 / 60); };
 
+//var ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+//var pxtone = new Pxtone();
+//pxtone.decoder = pxtnDecoder;
+
+//var bufferObj;
+//var src;
+
+//var requestor = new XMLHttpRequest();
+
+//function readerload() {
+  //ctx.decodePxtoneData(requestor.response).then(({buffer, data}) => {
+    //bufferObj = {
+      //buffer,
+      //loopStart: data.loopStart,
+      //loopEnd: data.loopEnd
+    //};
+  //});
+//}
+
+//requestor.addEventListener('load', readerload);
+
+//var arrayBuffer = new ArrayBuffer();
+
+//requestor.open("GET", "music/test.ptcop", true);
+//requestor.responseType = "arraybuffer";
+//requestor.onload = function (oEvent) {
+    //arrayBuffer = requestor.response;
+    //console.log(arrayBuffer);
+//};
+//requestor.send();
+
+
+//ctx.decodePxtoneData = pxtone.decodePxtoneData.bind(pxtone, ctx);
+
+//src = ctx.createBufferSource();
+//src.buffer = bufferObj.buffer;
+//src.loop = true;
+//src.loopStart = bufferObj.loopStart;
+//src.loopEnd = bufferObj.loopEnd;
+//src.start(ctx.currentTime);
+//src.connect(ctx.destination);
+
 var canvas = document.getElementById('canvas');
 canvas.style.border = '1px solid white';
 var width = 240;
@@ -16,8 +59,6 @@ var myY = 0;
 var myXm = 0;
 var myYm = 0;
 var walkSpeed = 512;
-
-
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -211,7 +252,7 @@ var render = function(){
 
     context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
 };
-var npcAct = [ npc000 ];
+//var npcAct = [ npc000 ];
 
 function NPC( npcType, x,  y,  xm,  ym,  dir,  state,  parent){
     this.type = npcType;
@@ -221,5 +262,5 @@ function NPC( npcType, x,  y,  xm,  ym,  dir,  state,  parent){
     this.ym = ym;
     this.dir = dir;
     this.state = state;
-    this.parent = parent||false;
-}
+    this.parent = parent||false
+};
