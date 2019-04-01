@@ -4,7 +4,7 @@
     top: 40%;
     right: 50%;
     left: 50%;
-    width: auto;
+    width: 480px;
     height: auto;
     margin-left: auto;
     margin-right: auto;
@@ -35,8 +35,8 @@ h1{
 }
  body{
                     background-color: #17111A;
-                    width: 480px;
-                    height: 480px;
+                    width: 240px;
+                    height: 240px;
                     image-rendering: -moz-crisp-edges;
                     image-rendering: -webkit-crisp-edges;
                     image-rendering: pixelated;
@@ -70,9 +70,4 @@ h1{
     bottom:10%;
     height:auto;
     width: 1250;
-    
 }
-
-
-
-
