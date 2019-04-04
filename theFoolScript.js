@@ -43,6 +43,27 @@ var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame
 //src.start(ctx.currentTime);
 //src.connect(ctx.destination);
 
+function RECT(xi, yi, xii, yii){
+    this.x1 = xi;
+    this.y1 = yi;
+    this.x2 = xii;
+    this.y2 = yii;
+    
+    this.move = function(xM, yM){
+        this.x1 += xM;
+        this.x2 += xM;
+        this.y1 += yM;
+        this.y2 += yM;
+    }
+}
+RECT.prototype.col = function(RectB){
+    
+        if ((this.x2 < RectB.x1 || this.x1 > RectB.x2) || (this.y2 < RectB.y1 || this.y1 > RectB.y2)) {
+            return false;
+        }
+        return true;
+    }
+
 var canvas = document.getElementById('canvas');
 canvas.style.border = '1px solid white';
 var width = 240;
@@ -58,7 +79,12 @@ var myX = 0;
 var myY = 0;
 var myXm = 0;
 var myYm = 0;
+var pRect = new RECT(0,0,16 * 512,16 * 512);
 var walkSpeed = 512;
+
+var wallBlock = new RECT(16 * 5 * 512, 16 * 5 * 512, 16 * 9 * 512, 16 * 7 * 512);
+
+var attackFrames = 0;
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -242,7 +268,19 @@ var update = function() {
     }
     
     myX += myXm;
+    pRect.move(myXm, 0);
+    if(pRect.col(wallBlock)){
+        myX -= myXm;
+        pRect.move(0 - myXm, 0);
+    }
+    
     myY += myYm;
+    pRect.move(0, myYm);
+    if(pRect.col(wallBlock)){
+        myY -= myYm;
+        pRect.move(0, 0 - myYm);
+    }
+    
 };
 
 var render = function(){
@@ -251,6 +289,15 @@ var render = function(){
     context.fillRect(0,0,width,height);
 
     context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
+    var string = "" + pRect.x1 / 512 + " " + pRect.y1 / 512 + " " + pRect.x2 / 512 + " " + pRect.y2 / 512;
+    var string2 = "" + wallBlock.x1 / 512 + " " + wallBlock.y1 / 512 + " " + wallBlock.x2 / 512 + " " + wallBlock.y2 / 512;
+    context.fillStyle = "#ffffff";
+    context.fillText(string, 0, 10, 10000);
+    context.fillText(string2, 0, 30, 10000);
+    if(pRect.col(wallBlock)){
+       context.fillStyle = "#ff00ff";
+       }
+    context.fillRect(wallBlock.x1 / 512, wallBlock.y1 / 512, 16 * 4, 16 * 2);
 };
 //var npcAct = [ npc000 ];
 
