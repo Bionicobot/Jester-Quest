@@ -56,9 +56,28 @@ function RECT(xi, yi, xii, yii){
         this.y2 += yM;
     }
 }
+
+function putRect(image, x, y, rectSrc)
+{
+    context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, (x - (x % 512)) / 512, (y - (y % 512)) / 512, rectSrc.x2, rectSrc.y2);
+}
+
+function putRect2(image, x, y, rectSrc)
+{
+    context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, x, y, rectSrc.x2, rectSrc.y2);
+}
+
 RECT.prototype.col = function(RectB){
     
         if ((this.x2 < RectB.x1 || this.x1 > RectB.x2) || (this.y2 < RectB.y1 || this.y1 > RectB.y2)) {
+            return false;
+        }
+        return true;
+    }
+
+RECT.prototype.col2 = function(xx, yy){
+    
+        if ((this.x2 < (xx * 16 * 512) || this.x1 > ((xx + 1) * 16 * 512)) || (this.y2 < (yy * 16 * 512) || this.y1 > ((yy + 1) * 16 * 512))) {
             return false;
         }
         return true;
@@ -79,10 +98,45 @@ var myX = 0;
 var myY = 0;
 var myXm = 0;
 var myYm = 0;
-var pRect = new RECT(0,0,16 * 512,16 * 512);
+var pRect = new RECT(2 * 512, 10 * 512, 14 * 512, 15 * 512);
 var walkSpeed = 512;
 
-var wallBlock = new RECT(16 * 5 * 512, 16 * 5 * 512, 16 * 9 * 512, 16 * 7 * 512);
+var level = [];
+for(var y = 0; y < 15; y++) {
+    level[y] = [];
+    for(var x = 0; x < 15; x++) {
+        level[y][x] = false;
+    }
+}
+
+
+level[6][6] = true;
+
+function colLevel(colRect){
+    for(var y = 0; y < 15; y++){
+        for(var x = 0; x < 15; x++){
+            if(level[y][x] == true){
+                if(pRect.col2(x,y)){
+                    return true;
+                }
+            }
+        }   
+    }
+    return false;
+}
+
+function putLevel(){
+    for(var y = 0; y < 15; y++){
+        for(var x = 0; x < 15; x++){
+            if(level[y][x]){
+                context.fillRect(x * 16, y * 16, 16, 16);
+            }
+        }   
+    }
+    return false;
+}
+
+var doDebug = false;
 
 var attackFrames = 0;
 
@@ -91,6 +145,28 @@ MyIm.src = "fool.png";
 
 var TitIm = new Image();
 TitIm.src = "title.png";
+
+canvas.addEventListener("mousedown", getPosition, false);
+
+function getPosition(event)
+{
+    var x = event.x;
+    var y = event.y;   
+    console.log(x);
+    console.log(y);
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop; 
+    console.log(x);
+    console.log(y);
+    
+    var xPo = ((x - (x % 32)) / 32);
+    var yPo = ((y - (y % 32)) / 32);
+    
+    if(doDebug && yPo > -1 && xPo > -1 && yPo < 15 && xPo < 15){
+        level[yPo][xPo] = !level[yPo][xPo];
+       }
+    
+}
 
 var step = function () {
     context.fillStyle = '#17111A';
@@ -106,7 +182,7 @@ var step = function () {
         update();
         render();
         if(isJustPressed(KVAL.EQU)){
-            gameState = 2;
+            doDebug = !doDebug;
         }
         break;
             
@@ -269,14 +345,14 @@ var update = function() {
     
     myX += myXm;
     pRect.move(myXm, 0);
-    if(pRect.col(wallBlock)){
+    if(colLevel(pRect)){
         myX -= myXm;
         pRect.move(0 - myXm, 0);
     }
     
     myY += myYm;
     pRect.move(0, myYm);
-    if(pRect.col(wallBlock)){
+    if(colLevel(pRect)){
         myY -= myYm;
         pRect.move(0, 0 - myYm);
     }
@@ -287,17 +363,15 @@ var render = function(){
 
     context.fillStyle = '#17111A';
     context.fillRect(0,0,width,height);
+    
+    context.fillStyle = "#ffffff";
+    
+    putLevel();
 
     context.drawImage(MyIm, 0 + (16 * pframe), 0 + (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
     var string = "" + pRect.x1 / 512 + " " + pRect.y1 / 512 + " " + pRect.x2 / 512 + " " + pRect.y2 / 512;
-    var string2 = "" + wallBlock.x1 / 512 + " " + wallBlock.y1 / 512 + " " + wallBlock.x2 / 512 + " " + wallBlock.y2 / 512;
     context.fillStyle = "#ffffff";
     context.fillText(string, 0, 10, 10000);
-    context.fillText(string2, 0, 30, 10000);
-    if(pRect.col(wallBlock)){
-       context.fillStyle = "#ff00ff";
-       }
-    context.fillRect(wallBlock.x1 / 512, wallBlock.y1 / 512, 16 * 4, 16 * 2);
 };
 //var npcAct = [ npc000 ];
 
