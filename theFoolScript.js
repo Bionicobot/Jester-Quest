@@ -14,11 +14,16 @@ var nextRInput;
 var nextDInput;
 var tileInput;
 var drawModeSelect;
+var drawTileSelect;
 var drawMode = 0;
 var curDrawTile = 0;
 var break1;
 var break2;
 var break3;
+var dT1;
+var dT2;
+var dT3;
+var dT4;
 
 var level = [];
 
@@ -37,6 +42,10 @@ function initDebug() {
 	paraG = window.document.createElement('p');
     document.getElementsByTagName("P")[0].appendChild(paraG);
 	
+	dT1 = window.document.createElement('p');
+	dT1.textContent = "Surrounding Levels";
+    paraG.appendChild(dT1);
+	
 	nextLInput = window.document.createElement('input');
 	nextLInput.setAttribute("type", "text");
     paraG.appendChild(nextLInput);
@@ -53,29 +62,46 @@ function initDebug() {
 	nextDInput.setAttribute("type", "text");
     paraG.appendChild(nextDInput);
 	
-	
 	break1 = window.document.createElement('br');
     paraG.appendChild(break1);
 	
+	dT3 = window.document.createElement('p');
+	dT3.textContent = "Tileset";
+    paraG.appendChild(dT3);
 	
 	tileInput = window.document.createElement('input');
 	tileInput.setAttribute("type", "text");
     paraG.appendChild(tileInput);
 	
-	
 	break3 = window.document.createElement('br');
     paraG.appendChild(break3);
 	
+	dT2 = window.document.createElement('p');
+	dT2.textContent = "Draw Mode";
+    paraG.appendChild(dT2);
 	
 	drawModeSelect = window.document.createElement('input');
 	drawModeSelect.setAttribute("type", "text");
     paraG.appendChild(drawModeSelect);
 	
-	
 	break2 = window.document.createElement('br');
     paraG.appendChild(break2);
 	
+	dT4 = window.document.createElement('p');
+	dT4.textContent = "Draw Tile";
+    paraG.appendChild(dT4);
 	
+	drawTileSelect = window.document.createElement('input');
+	drawTileSelect.setAttribute("type", "text");
+    paraG.appendChild(drawTileSelect);
+	
+	nextLInput.value = curNextTo[0];
+	nextUInput.value = curNextTo[1];
+	nextRInput.value = curNextTo[2];
+	nextDInput.value = curNextTo[3];
+	tileInput.value = curTileset;
+	drawModeSelect.value = drawMode;
+	drawTileSelect.value = curDrawTile;
 
 	nextLInput.addEventListener('keydown', function onEvent(event) {
 		if (event.key === "Enter") {
@@ -115,6 +141,13 @@ function initDebug() {
 	drawModeSelect.addEventListener('keydown', function onEvent(event) {
 		if (event.key === "Enter") {
 			drawMode = parseInt(drawModeSelect.value, 10);
+			return false;
+		}
+	});
+
+	drawTileSelect.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curDrawTile = parseInt(drawTileSelect.value, 10);
 			return false;
 		}
 	});
