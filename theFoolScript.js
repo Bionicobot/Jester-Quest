@@ -6,55 +6,126 @@ var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame
 $.getScript("/test.js");
 
 var canvas = document.getElementById('canvas');
+
+var paraG;
+var nextLInput;
+var nextUInput;
+var nextRInput;
+var nextDInput;
+var tileInput;
+var drawModeSelect;
+var drawMode = 0;
+var curDrawTile = 0;
+var break1;
+var break2;
+var break3;
+
+var level = [];
+
+var backTile = [];
+
+var foreTile = [];
+
+var curNextTo = [-1, -1, -1, -1];
+
+//var gNPCs = [];
+
+var curTileset = 0;
+
+function initDebug() {
+	"use strict";
+	paraG = window.document.createElement('p');
+    document.getElementsByTagName("P")[0].appendChild(paraG);
+	
+	nextLInput = window.document.createElement('input');
+	nextLInput.setAttribute("type", "text");
+    paraG.appendChild(nextLInput);
+	
+	nextUInput = window.document.createElement('input');
+	nextUInput.setAttribute("type", "text");
+    paraG.appendChild(nextUInput);
+	
+	nextRInput = window.document.createElement('input');
+	nextRInput.setAttribute("type", "text");
+    paraG.appendChild(nextRInput);
+	
+	nextDInput = window.document.createElement('input');
+	nextDInput.setAttribute("type", "text");
+    paraG.appendChild(nextDInput);
+	
+	
+	break1 = window.document.createElement('br');
+    paraG.appendChild(break1);
+	
+	
+	tileInput = window.document.createElement('input');
+	tileInput.setAttribute("type", "text");
+    paraG.appendChild(tileInput);
+	
+	
+	break3 = window.document.createElement('br');
+    paraG.appendChild(break3);
+	
+	
+	drawModeSelect = window.document.createElement('input');
+	drawModeSelect.setAttribute("type", "text");
+    paraG.appendChild(drawModeSelect);
+	
+	
+	break2 = window.document.createElement('br');
+    paraG.appendChild(break2);
+	
+	
+
+	nextLInput.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curNextTo[0] = parseInt(nextLInput.value, 10);
+			return false;
+		}
+	});
+	
+	nextUInput.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curNextTo[1] = parseInt(nextUInput.value, 10);
+			return false;
+		}
+	});
+	
+	nextRInput.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curNextTo[2] = parseInt(nextRInput.value, 10);
+			return false;
+		}
+	});
+	
+	nextDInput.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curNextTo[3] = parseInt(nextDInput.value, 10);
+			return false;
+		}
+	});
+	
+	tileInput.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			curTileset = parseInt(tileInput.value, 10);
+			return false;
+		}
+	});
+
+	drawModeSelect.addEventListener('keydown', function onEvent(event) {
+		if (event.key === "Enter") {
+			drawMode = parseInt(drawModeSelect.value, 10);
+			return false;
+		}
+	});
+}
+
 canvas.style.border = '1px solid white';
 var width = 240;
 var height = 240;
 canvas.width = width;
 canvas.height = height;
 var context = canvas.getContext('2d');
-
-//var ctx = new (window.AudioContext || window.webkitAudioContext)();
-
-//var pxtone = new Pxtone();
-//pxtone.decoder = pxtnDecoder;
-
-//var bufferObj;
-//var src;
-
-//var requestor = new XMLHttpRequest();
-
-//function readerload() {
-  //ctx.decodePxtoneData(requestor.response).then(({buffer, data}) => {
-    //bufferObj = {
-      //buffer,
-      //loopStart: data.loopStart,
-      //loopEnd: data.loopEnd
-    //};
-  //});
-//}
-
-//requestor.addEventListener('load', readerload);
-
-//var arrayBuffer = new ArrayBuffer();
-
-//requestor.open("GET", "music/test.ptcop", true);
-//requestor.responseType = "arraybuffer";
-//requestor.onload = function (oEvent) {
-    //arrayBuffer = requestor.response;
-    //console.log(arrayBuffer);
-//};
-//requestor.send();
-
-
-//ctx.decodePxtoneData = pxtone.decodePxtoneData.bind(pxtone, ctx);
-
-//src = ctx.createBufferSource();
-//src.buffer = bufferObj.buffer;
-//src.loop = true;
-//src.loopStart = bufferObj.loopStart;
-//src.loopEnd = bufferObj.loopEnd;
-//src.start(ctx.currentTime);
-//src.connect(ctx.destination);
 
 function RECT(xi, yi, xii, yii) {
     "use strict";
@@ -71,35 +142,27 @@ function RECT(xi, yi, xii, yii) {
     };
 }
 
-var level = [];
-
-var curNextTo = [-1, -1, -1, -1];
-
-var gNPCs = [];
-
-var curTileset = 0;
-
-function STAGE() {
-    "use strict";
-    this.nextTo = [-1, -1, -1, -1];
+//function STAGE() {
+    //"use strict";
+    //this.nextTo = [0, 0, 0, 0];
     
-    this.tileset = 0;
+    //this.tileset = 0;
     
-    this.level = [];
+    //this.level = [];
     
-    var y, x;
+    //var y, x;
     
-    for (y = 0; y < 15; y += 1) {
-        this.level[y] = [];
-        for (x = 0; x < 15; x += 1) {
-            this.level[y][x] = false;
-        }
-    }
+    //for (y = 0; y < 15; y += 1) {
+        //this.level[y] = [];
+        //for (x = 0; x < 15; x += 1) {
+            //this.level[y][x] = false;
+        //}
+    //}
     
-    this.numNPC = 0;
+    //this.numNPC = 0;
     
-    this.NPCs = [];
-}
+    //this.NPCs = [];
+//}
 
 var saveLevel = function (filename, data) {
 	"use strict";
@@ -120,14 +183,65 @@ var saveLevel = function (filename, data) {
     }
 };
 
+function loadLevel(numStage) {
+	"use strict";
+	var levelText = "", i, splote = [], x, y;
+	$.get('levels/' + numStage + '.txt', function (data) {
+		
+		levelText = data;
+		
+		splote = levelText.split(",");
+		
+		for (i = 0; i < 4; i += 1) {
+			curNextTo[i] = parseInt(splote[i], 10);
+		}
+		
+		curTileset = parseInt(splote[4], 10);
+		
+		for (y = 0; y < 15; y += 1) {
+			for (x = 0; x < 15; x += 1) {
+				level[y][x] = parseInt(splote[(((y * 15) + x) + 5)], 10);
+			}
+		}
+		
+		for (y = 0; y < 15; y += 1) {
+			for (x = 0; x < 15; x += 1) {
+				backTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 255)], 10);
+			}
+		}
+		
+		for (y = 0; y < 15; y += 1) {
+			for (x = 0; x < 15; x += 1) {
+				foreTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 255 + 255)], 10);
+			}
+		}
+	});
+}
+
 function saveStage(numStage) {
     "use strict";
-    var temp = new STAGE(), fileName = "";
-    temp.nextTo = curNextTo;
-    temp.tileset = curTileset;
-    temp.level = level;
-    temp.numNPC = gNPCs.length;
-    temp.NPCs = gNPCs;
+    var temp = "", fileName = "", y, x;
+    temp += curNextTo[0] + "," + curNextTo[1] + "," + curNextTo[2] + "," + curNextTo[3] + ",";
+    temp += curTileset + ",";
+	for (y = 0; y < 15; y += 1) {
+        for (x = 0; x < 15; x += 1) {
+            temp += level[y][x] + ",";
+        }
+	}
+    temp += ",";
+	for (y = 0; y < 15; y += 1) {
+        for (x = 0; x < 15; x += 1) {
+            temp += backTile[y][x] + ",";
+        }
+	}
+    temp += ",";
+	for (y = 0; y < 15; y += 1) {
+        for (x = 0; x < 15; x += 1) {
+            temp += foreTile[y][x] + ",";
+        }
+	}
+    //temp.numNPC = gNPCs.length;
+    //temp.NPCs = gNPCs;
 	fileName += numStage;
 	fileName += ".txt";
 	saveLevel(fileName, temp);
@@ -175,24 +289,26 @@ function initLevel() {
     var y, x;
     for (y = 0; y < 15; y += 1) {
         level[y] = [];
+        backTile[y] = [];
+        foreTile[y] = [];
         for (x = 0; x < 15; x += 1) {
-            level[y][x] = false;
+            level[y][x] = 0;
+			backTile[y][x] = 0;
+			foreTile[y][x] = 0;
         }
     }
 }
 
 initLevel();
 
-level[6][6] = true;
-
-saveStage(0);
+level[6][6] = 1;
 
 function colLevel(colRect) {
     "use strict";
     var y, x;
     for (y = 0; y < 15; y += 1) {
         for (x = 0; x < 15; x += 1) {
-            if (level[y][x] === true) {
+            if (level[y][x] === 1) {
                 if (colRect.col2(x, y)) {
                     return true;
                 }
@@ -207,7 +323,7 @@ function putLevel() {
     var y, x;
     for (y = 0; y < 15; y += 1) {
         for (x = 0; x < 15; x += 1) {
-            if (level[y][x]) {
+            if (level[y][x] === 1) {
                 context.fillRect(x * 16, y * 16, 16, 16);
             }
         }
@@ -216,8 +332,6 @@ function putLevel() {
 }
 
 var doDebug = false;
-
-//var attackFrames = 0;
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -236,7 +350,23 @@ function getPosition(event) {
     yPo = ((y - (y % 32)) / 32);
     
     if (doDebug && yPo > -1 && xPo > -1 && yPo < 15 && xPo < 15) {
-        level[yPo][xPo] = !level[yPo][xPo];
+		switch (drawMode) {
+		case 0:
+			if (level[yPo][xPo] === 0) {
+				level[yPo][xPo] = 1;
+			} else {
+				level[yPo][xPo] = 0;
+			}
+			break;
+		
+		case 1:
+			backTile[yPo][xPo] = curDrawTile;
+			break;
+		
+		case 2:
+			foreTile[yPo][xPo] = curDrawTile;
+			break;
+		}
     }
     
 }
@@ -412,9 +542,6 @@ var render = function () {
     putLevel();
 
     context.drawImage(MyIm, (16 * pframe), (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
-    //var string = "" + pRect.x1 / 512 + " " + pRect.y1 / 512 + " " + pRect.x2 / 512 + " " + pRect.y2 / 512;
-    //context.fillStyle = "#ffffff";
-    //context.fillText(string, 0, 10, 10000);
 };
 //var npcAct = [ npc000 ];
 
@@ -447,12 +574,23 @@ var step = function () {
         update();
         render();
         if (isJustPressed(KVAL.EQU)) {
+			if (!doDebug) {
+				initDebug();
+			} else {
+				document.getElementsByTagName("P")[0].removeChild(paraG);
+				window.URL.revokeObjectURL(paraG);
+			}
             doDebug = !doDebug;
+        }
+        if (isJustPressed(KVAL.ESC)) {
+            loadLevel(0);
+        }
+        if (isJustPressed(KVAL.SHIFT)) {
+            saveStage(0);
         }
         break;
             
     case 2:
-        //editor();
         render();
         if (isJustPressed(KVAL.EQU)) {
             gameState = 1;
