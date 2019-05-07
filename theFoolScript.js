@@ -25,6 +25,9 @@ var dT2;
 var dT3;
 var dT4;
 
+var tileSet = new Image();
+tileSet.src = "levels/0.png";
+
 var level = [];
 
 var backTile = [];
@@ -134,6 +137,7 @@ function initDebug() {
 	tileInput.addEventListener('keydown', function onEvent(event) {
 		if (event.key === "Enter") {
 			curTileset = parseInt(tileInput.value, 10);
+			tileSet.src = "levels/" + curTileset + ".png";
 			return false;
 		}
 	});
@@ -239,13 +243,13 @@ function loadLevel(numStage) {
 		
 		for (y = 0; y < 15; y += 1) {
 			for (x = 0; x < 15; x += 1) {
-				backTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 255)], 10);
+				backTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 226)], 10);
 			}
 		}
 		
 		for (y = 0; y < 15; y += 1) {
 			for (x = 0; x < 15; x += 1) {
-				foreTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 255 + 255)], 10);
+				foreTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 226 + 226)], 10);
 			}
 		}
 	});
@@ -351,14 +355,17 @@ function colLevel(colRect) {
     return false;
 }
 
-function putLevel() {
+function putLevel(fore) {
     "use strict";
     var y, x;
     for (y = 0; y < 15; y += 1) {
         for (x = 0; x < 15; x += 1) {
-            if (level[y][x] === 1) {
-                context.fillRect(x * 16, y * 16, 16, 16);
-            }
+            if (fore) {
+				context.drawImage(tileSet, (16 * (foreTile[y][x] % 16)), (foreTile[y][x] - (foreTile[y][x] % 16)), 16, 16, x * 16, y * 16, 16, 16);
+            } else {
+				context.drawImage(tileSet, (16 * (backTile[y][x] % 16)), (backTile[y][x] - (foreTile[y][x] % 16)), 16, 16, x * 16, y * 16, 16, 16);
+			}
+			
         }
     }
     return false;
@@ -572,9 +579,11 @@ var render = function () {
     
     context.fillStyle = "#ffffff";
     
-    putLevel();
+    putLevel(false);
 
     context.drawImage(MyIm, (16 * pframe), (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
+    
+    putLevel(true);
 };
 //var npcAct = [ npc000 ];
 
