@@ -7,6 +7,8 @@ $.getScript("/test.js");
 
 var canvas = document.getElementById('canvas');
 
+var doDebug = false;
+
 var paraG;
 var nextLInput;
 var nextUInput;
@@ -320,6 +322,8 @@ var myXm = 0;
 var myYm = 0;
 var pRect = new RECT(2 * 512, 10 * 512, 14 * 512, 15 * 512);
 var walkSpeed = 512;
+var mX = 0;
+var mY = 0;
 
 function initLevel() {
     "use strict";
@@ -357,21 +361,32 @@ function colLevel(colRect) {
 
 function putLevel(fore) {
     "use strict";
-    var y, x;
+    var y, x, x1, y1;
     for (y = 0; y < 15; y += 1) {
         for (x = 0; x < 15; x += 1) {
+			y1 = 0;
             if (fore) {
-				context.drawImage(tileSet, (16 * (foreTile[y][x] % 16)), (foreTile[y][x] - (foreTile[y][x] % 16)), 16, 16, x * 16, y * 16, 16, 16);
+				for (x1 = foreTile[y][x]; x1 >= 16; x1 -= 16) {
+					y1 += 1;
+				}
+				context.drawImage(tileSet, (16 * x1), (16 * y1), 16, 16, x * 16, y * 16, 16, 16);
             } else {
-				context.drawImage(tileSet, (16 * (backTile[y][x] % 16)), (backTile[y][x] - (foreTile[y][x] % 16)), 16, 16, x * 16, y * 16, 16, 16);
+				for (x1 = backTile[y][x]; x1 >= 16; x1 -= 16) {
+					y1 += 1;
+				}
+				context.drawImage(tileSet, (16 * x1), (16 * y1), 16, 16, x * 16, y * 16, 16, 16);
 			}
-			
+			if (doDebug && drawMode === 0) {
+				if (level[y][x] === 1) {
+					context.globalAlpha = 0.25;
+					context.fillRect(x * 16, y * 16, 16, 16);
+					context.globalAlpha = 1.0;
+				}
+			}
         }
     }
     return false;
 }
-
-var doDebug = false;
 
 var MyIm = new Image();
 MyIm.src = "fool.png";
@@ -411,7 +426,20 @@ function getPosition(event) {
     
 }
 
+function tellPos(event) {
+    "use strict";
+    var x = event.x, y = event.y;
+    
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+    
+    mX = ((x - (x % 32)) / 32);
+    mY = ((y - (y % 32)) / 32);
+}
+
 canvas.addEventListener("mousedown", getPosition, false);
+
+canvas.addEventListener('mousemove', tellPos, false);
 
 Object.defineProperty(Number.prototype, 'b', {set: function () {"use strict"; return false; }, get: function () {"use strict"; return parseInt(this, 2); }});
 
@@ -427,6 +455,8 @@ var KVAL = {
     ESC     : 8,
     SHIFT   : 9,
     EQU     : 10,
+	LBRAK	: 11,
+	RBRAK	: 12,
     
     key     : {
         38  :   (10).b,
@@ -438,7 +468,9 @@ var KVAL = {
         67  :   (10000000).b,
         27  :   (100000000).b,
         16  :   (1000000000).b,
-        187 :   (10000000000).b
+        187 :   (10000000000).b,
+        219 :   (100000000000).b,
+        221 :   (1000000000000).b
     },
     
     map     : {
@@ -451,7 +483,9 @@ var KVAL = {
         6   :   67,
         7   :   27,
         8   :   16,
-        9   :   187
+        9   :   187,
+        10  :   219,
+        11  :   221
     },
     
     map2    : {
@@ -464,7 +498,9 @@ var KVAL = {
         67  :   7,
         27  :   8,
         16  :   9,
-        187 :   10
+        187 :   10,
+		219 :	11,
+		221 :	12
     }
     
 };
@@ -499,7 +535,7 @@ var kUp = function (event) {
 var resetJustPressed = function () {
 	"use strict";
 	var i;
-    for (i = 0; i < 10; i += 1) {
+    for (i = 0; i < 12; i += 1) {
         justPressed &= ~KVAL.key[KVAL.map[i]];
     }
 };
@@ -584,6 +620,12 @@ var render = function () {
     context.drawImage(MyIm, (16 * pframe), (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
     
     putLevel(true);
+	if (doDebug && drawMode !== 0) {
+		context.globalAlpha = 0.5;
+		context.drawImage(tileSet, (16 * (curDrawTile % 16)), (curDrawTile - (curDrawTile % 16)), 16, 16, mX * 16, mY * 16, 16, 16);
+		context.globalAlpha = 1.0;
+	}
+	
 };
 //var npcAct = [ npc000 ];
 
@@ -630,6 +672,18 @@ var step = function () {
         if (isJustPressed(KVAL.SHIFT)) {
             saveStage(0);
         }
+		if (isJustPressed(KVAL.LBRAK) && doDebug) {
+			if ((curDrawTile -= 1) < 0) {
+				curDrawTile = 255;
+			}
+			drawTileSelect.value = curDrawTile;
+		}
+		if (isJustPressed(KVAL.RBRAK) && doDebug) {
+			if ((curDrawTile += 1) >= 256) {
+				curDrawTile = 0;
+			}
+			drawTileSelect.value = curDrawTile;
+		}
         break;
             
     case 2:
