@@ -1,13 +1,36 @@
-/* global window, document, Image, $, Blob */
+/*jslint browser: true*/
+/* global window, document, Image, Blob */
+/*global $, jQuery, alert*/
 /*jslint bitwise: true */
+/*eslint no-unused-vars: ["error", { "vars": "local" }]*/
 var animate = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callBack) { "use strict"; window.setTimeout(callBack, 1000 / 60); };
-
-//$("body").hide();
-$.getScript("/test.js");
 
 var canvas = document.getElementById('canvas');
 
+canvas.style.border = '1px solid white';
+var width = 240;
+var height = 240;
+canvas.width = width;
+canvas.height = height;
+var context = canvas.getContext('2d');
+
 var doDebug = false;
+
+var curLevel = 0;
+
+var inLevelTrans = false;
+var levelTransDir = 0;
+var levelTransCount = 0;
+var levelTransOut = true;
+
+var MyIm = new Image();
+MyIm.src = "fool.png";
+
+var TitIm = new Image();
+TitIm.src = "title.png";
+
+var keys = 0;
+var justPressed = 0;
 
 var paraG;
 var nextLInput;
@@ -36,7 +59,7 @@ var backTile = [];
 
 var foreTile = [];
 
-var curNextTo = [-1, -1, -1, -1];
+var curNextTo = [0, 0, 0, 0];
 
 //var gNPCs = [];
 
@@ -159,50 +182,6 @@ function initDebug() {
 	});
 }
 
-canvas.style.border = '1px solid white';
-var width = 240;
-var height = 240;
-canvas.width = width;
-canvas.height = height;
-var context = canvas.getContext('2d');
-
-function RECT(xi, yi, xii, yii) {
-    "use strict";
-    this.x1 = xi;
-    this.y1 = yi;
-    this.x2 = xii;
-    this.y2 = yii;
-    
-    this.move = function (xM, yM) {
-        this.x1 += xM;
-        this.x2 += xM;
-        this.y1 += yM;
-        this.y2 += yM;
-    };
-}
-
-//function STAGE() {
-    //"use strict";
-    //this.nextTo = [0, 0, 0, 0];
-    
-    //this.tileset = 0;
-    
-    //this.level = [];
-    
-    //var y, x;
-    
-    //for (y = 0; y < 15; y += 1) {
-        //this.level[y] = [];
-        //for (x = 0; x < 15; x += 1) {
-            //this.level[y][x] = false;
-        //}
-    //}
-    
-    //this.numNPC = 0;
-    
-    //this.NPCs = [];
-//}
-
 var saveLevel = function (filename, data) {
 	"use strict";
     var blob = new Blob([data], {type: 'text/csv'}), elem;
@@ -254,6 +233,7 @@ function loadLevel(numStage) {
 				foreTile[y][x] = parseInt(splote[(((y * 15) + x) + 5 + 226 + 226)], 10);
 			}
 		}
+		curLevel = numStage;
 	});
 }
 
@@ -286,15 +266,30 @@ function saveStage(numStage) {
 	saveLevel(fileName, temp);
 }
 
-//function putRect(image, x, y, rectSrc) {
-    //"use strict";
-    //context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, (x - (x % 512)) / 512, (y - (y % 512)) / 512, rectSrc.x2, rectSrc.y2);
-//}
+function RECT(xi, yi, xii, yii) {
+    "use strict";
+    this.x1 = xi;
+    this.y1 = yi;
+    this.x2 = xii;
+    this.y2 = yii;
+    
+    this.move = function (xM, yM) {
+        this.x1 += xM;
+        this.x2 += xM;
+        this.y1 += yM;
+        this.y2 += yM;
+    };
+}
 
-//function putRect2(image, x, y, rectSrc) {
-    //"use strict";
-    //context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, x, y, rectSrc.x2, rectSrc.y2);
-//}
+function putRect(image, x, y, rectSrc) {
+    "use strict";
+    context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, (x - (x % 512)) / 512, (y - (y % 512)) / 512, rectSrc.x2, rectSrc.y2);
+}
+
+function putRect2(image, x, y, rectSrc) {
+    "use strict";
+    context.drawImage(image, rectSrc.x1, rectSrc.y1, rectSrc.x2, rectSrc.y2, x, y, rectSrc.x2, rectSrc.y2);
+}
 
 RECT.prototype.col = function (RectB) {
     "use strict";
@@ -311,19 +306,6 @@ RECT.prototype.col2 = function (xx, yy) {
     }
     return true;
 };
-
-var pframeCount = 0;
-var pframe = 0;
-var pdir = 0;
-var gameState = 0;
-var myX = 0;
-var myY = 0;
-var myXm = 0;
-var myYm = 0;
-var pRect = new RECT(2 * 512, 10 * 512, 14 * 512, 15 * 512);
-var walkSpeed = 512;
-var mX = 0;
-var mY = 0;
 
 function initLevel() {
     "use strict";
@@ -342,7 +324,20 @@ function initLevel() {
 
 initLevel();
 
-level[6][6] = 1;
+loadLevel(0);
+
+var pframeCount = 0;
+var pframe = 0;
+var pdir = 0;
+var gameState = 0;
+var myX = 0;
+var myY = 0;
+var myXm = 0;
+var myYm = 0;
+var pRect = new RECT(2 * 512, 10 * 512, 14 * 512, 15 * 512);
+var walkSpeed = 512;
+var mX = 0;
+var mY = 0;
 
 function colLevel(colRect) {
     "use strict";
@@ -387,12 +382,6 @@ function putLevel(fore) {
     }
     return false;
 }
-
-var MyIm = new Image();
-MyIm.src = "fool.png";
-
-var TitIm = new Image();
-TitIm.src = "title.png";
 
 function getPosition(event) {
     "use strict";
@@ -505,9 +494,6 @@ var KVAL = {
     
 };
 
-var keys = 0;
-var justPressed = 0;
-
 var isPressed = function (bit) {
 	"use strict";
     return ((keys >> bit) % 2 !== 0);
@@ -517,7 +503,6 @@ var isJustPressed = function (bit) {
 	"use strict";
     return ((justPressed >> bit) % 2 !== 0);
 };
-
 
 var kDown = function (event) {
 	"use strict";
@@ -557,8 +542,8 @@ var runTitle = function () {
     
 };
 
-var update = function () {
-    "use strict";
+function actPlayer() {
+	"use strict";
     if (isPressed(KVAL.LEFT)) {
         myXm = -walkSpeed;
         pdir = 1;
@@ -605,7 +590,20 @@ var update = function () {
         myY -= myYm;
         pRect.move(0, -myYm);
     }
-    
+}
+
+var update = function () {
+    "use strict";
+	if (!inLevelTrans) {
+		actPlayer();
+	} else if (levelTransOut && (levelTransCount += 1) >= 15 * 16) {
+		levelTransOut = false;
+		loadLevel(curNextTo[levelTransDir]);
+	} else if (!levelTransOut && (levelTransCount -= 1) <= 0) {
+		inLevelTrans = false;
+		levelTransOut = true;
+		levelTransCount = 0;
+	}
 };
 
 var render = function () {
@@ -625,8 +623,13 @@ var render = function () {
 		context.drawImage(tileSet, (16 * (curDrawTile % 16)), (curDrawTile - (curDrawTile % 16)), 16, 16, mX * 16, mY * 16, 16, 16);
 		context.globalAlpha = 1.0;
 	}
+	if (inLevelTrans) {
+		context.fillStyle = '#17111A';
+		context.fillRect(0, 0, width, height);
+	}
 	
 };
+
 //var npcAct = [ npc000 ];
 
 //function NPC(npcType, x,  y,  xm,  ym,  dir,  state,  parent) {
@@ -641,7 +644,40 @@ var render = function () {
     //this.parent = parent || false;
 //}
 
-
+function keyInputThings() {
+	"use strict";
+	if (isJustPressed(KVAL.EQU)) {
+		if (!doDebug) {
+			initDebug();
+		} else {
+			document.getElementsByTagName("P")[0].removeChild(paraG);
+			window.URL.revokeObjectURL(paraG);
+		}
+		doDebug = !doDebug;
+	}
+	
+	if (isJustPressed(KVAL.ESC)) {
+		loadLevel(curLevel);
+	}
+	
+	if (isJustPressed(KVAL.SHIFT)) {
+		saveStage(curLevel);
+	}
+	
+	if (isJustPressed(KVAL.LBRAK) && doDebug) {
+		if ((curDrawTile -= 1) < 0) {
+			curDrawTile = 255;
+		}
+		drawTileSelect.value = curDrawTile;
+	}
+	
+	if (isJustPressed(KVAL.RBRAK) && doDebug) {
+		if ((curDrawTile += 1) >= 256) {
+			curDrawTile = 0;
+		}
+		drawTileSelect.value = curDrawTile;
+	}
+}
 
 var step = function () {
     "use strict";
@@ -657,33 +693,7 @@ var step = function () {
     case 1:
         update();
         render();
-        if (isJustPressed(KVAL.EQU)) {
-			if (!doDebug) {
-				initDebug();
-			} else {
-				document.getElementsByTagName("P")[0].removeChild(paraG);
-				window.URL.revokeObjectURL(paraG);
-			}
-            doDebug = !doDebug;
-        }
-        if (isJustPressed(KVAL.ESC)) {
-            loadLevel(0);
-        }
-        if (isJustPressed(KVAL.SHIFT)) {
-            saveStage(0);
-        }
-		if (isJustPressed(KVAL.LBRAK) && doDebug) {
-			if ((curDrawTile -= 1) < 0) {
-				curDrawTile = 255;
-			}
-			drawTileSelect.value = curDrawTile;
-		}
-		if (isJustPressed(KVAL.RBRAK) && doDebug) {
-			if ((curDrawTile += 1) >= 256) {
-				curDrawTile = 0;
-			}
-			drawTileSelect.value = curDrawTile;
-		}
+		keyInputThings();
         break;
             
     case 2:
