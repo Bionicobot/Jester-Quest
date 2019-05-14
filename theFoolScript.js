@@ -20,7 +20,7 @@ var curLevel = 0;
 
 var inLevelTrans = false;
 var levelTransDir = 0;
-var levelTransCount = 0;
+var levelTransCount = 15 * 16;
 var levelTransOut = true;
 
 var MyIm = new Image();
@@ -330,14 +330,14 @@ var pframeCount = 0;
 var pframe = 0;
 var pdir = 0;
 var gameState = 0;
-var myX = 0;
-var myY = 0;
 var myXm = 0;
 var myYm = 0;
 var pRect = new RECT(2 * 512, 10 * 512, 14 * 512, 15 * 512);
 var walkSpeed = 512;
 var mX = 0;
 var mY = 0;
+
+var worldRect = new RECT(0, 0, 15 * 16 * 512, 15 * 16 * 512);
 
 function colLevel(colRect) {
     "use strict";
@@ -576,18 +576,13 @@ function actPlayer() {
     } else {
         pframe = 0;
     }
-    
-    myX += myXm;
     pRect.move(myXm, 0);
     if (colLevel(pRect)) {
-        myX -= myXm;
         pRect.move(-myXm, 0);
     }
     
-    myY += myYm;
     pRect.move(0, myYm);
     if (colLevel(pRect)) {
-        myY -= myYm;
         pRect.move(0, -myYm);
     }
 }
@@ -596,18 +591,49 @@ var update = function () {
     "use strict";
 	if (!inLevelTrans) {
 		actPlayer();
-	} else if (levelTransOut && (levelTransCount += 1) >= 15 * 16) {
+		if (!worldRect.col(pRect)) {
+			//console.out("Frick");
+			if ((pRect.y2 < worldRect.y1 && (pRect.x1 > worldRect.x1 || pRect.x2 < worldRect.x2))) {
+				levelTransDir = 1;
+				inLevelTrans = true;
+			} else if ((pRect.y1 - 14 * 512 > worldRect.y2 && (pRect.x1 > worldRect.x1 || pRect.x2 < worldRect.x2))) {
+				levelTransDir = 3;
+				inLevelTrans = true;
+			} else if ((pRect.x2 < worldRect.x1 && (pRect.y1 > worldRect.y1 || pRect.y2 < worldRect.y2))) {
+				levelTransDir = 0;
+				inLevelTrans = true;
+			} else if ((pRect.x1 > worldRect.x2 && (pRect.y1 > worldRect.y1 || pRect.y2 < worldRect.y2))) {
+				levelTransDir = 2;
+				inLevelTrans = true;
+			}
+		}
+	} else if (levelTransOut && (levelTransCount -= 4) <= 0) {
 		levelTransOut = false;
 		loadLevel(curNextTo[levelTransDir]);
-	} else if (!levelTransOut && (levelTransCount -= 1) <= 0) {
+		switch (levelTransDir) {
+		case 0:
+			pRect.move((512 * 16 * 14) - (pRect.x1 - 2 * 512), 0);
+			break;
+		case 1:
+			pRect.move(0, (512 * 16 * 14) - (pRect.y1 - 10 * 512));
+			break;
+		case 2:
+			pRect.move(-1 * (pRect.x1 - 2 * 512), 0);
+			break;
+		case 3:
+			pRect.move(0, -1 * (pRect.y1 - 10 * 512));
+			break;
+		}
+	} else if (!levelTransOut && (levelTransCount += 4) >= 15 * 16) {
 		inLevelTrans = false;
 		levelTransOut = true;
-		levelTransCount = 0;
+		levelTransCount = 15 * 16;
 	}
 };
 
 var render = function () {
 	"use strict";
+	var vX = 0, vY = 0, vW = 15 * 16, vH = 15 * 16;
     context.fillStyle = '#17111A';
     context.fillRect(0, 0, width, height);
     
@@ -615,7 +641,7 @@ var render = function () {
     
     putLevel(false);
 
-    context.drawImage(MyIm, (16 * pframe), (16 * pdir), 16, 16, (myX - (myX % 512)) / 512, (myY - (myY % 512)) / 512, 16, 16);
+    context.drawImage(MyIm, (16 * pframe), (16 * pdir), 16, 16, ((pRect.x1 - 2 * 512) - ((pRect.x1 - 2 * 512) % 512)) / 512, ((pRect.y1 - 10 * 512) - ((pRect.y1 - 10 * 512) % 512)) / 512, 16, 16);
     
     putLevel(true);
 	if (doDebug && drawMode !== 0) {
@@ -625,7 +651,38 @@ var render = function () {
 	}
 	if (inLevelTrans) {
 		context.fillStyle = '#17111A';
-		context.fillRect(0, 0, width, height);
+		if (levelTransOut) {
+			switch (levelTransDir) {
+			case 0:
+				vX = levelTransCount;
+				break;
+			case 1:
+				vY = levelTransCount;
+				break;
+			case 2:
+				vW = 15 * 16 - levelTransCount;
+				break;
+			case 3:
+				vH = 15 * 16 - levelTransCount;
+				break;
+			}
+		} else {
+			switch (levelTransDir) {
+			case 0:
+				vW = 15 * 16 - levelTransCount;
+				break;
+			case 1:
+				vH = 15 * 16 - levelTransCount;
+				break;
+			case 2:
+				vX = levelTransCount;
+				break;
+			case 3:
+				vY = levelTransCount;
+				break;
+			}
+		}
+		context.fillRect(vX, vY, vW, vH);
 	}
 	
 };
